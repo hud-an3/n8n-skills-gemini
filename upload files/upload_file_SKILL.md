@@ -4,7 +4,7 @@
 Upload the file provided in this workflow run to the correct Google Drive folder, resolving the destination folder based on what the user specified in their prompt.
 
 ## When to use this skill
-Trigger this skill whenever a file needs to be saved/uploaded to Google Drive as part of the workflow — typically as the final step after summarization or another processing skill has run.
+Trigger this skill whenever a file needs to be saved/uploaded to Google Drive as part of the workflow.
 
 ## Inputs
 - `file` (binary, required): The file to upload.
@@ -14,7 +14,7 @@ Trigger this skill whenever a file needs to be saved/uploaded to Google Drive as
 ## Steps
 1. Parse the user's prompt for a folder name.
 2. **If a folder name is specified:**
-   a. Search Google Drive for a folder matching that name.
+   a. Search Google Drive for a folder matching that name and get it's ID using the Search files and folders in Google Drive tool.
    b. If it exists, use its folder ID as the upload destination.
    c. If it does not exist, create a new folder with that exact name, then use the newly created folder's ID as the destination.
 3. **If no folder name is specified in the prompt (file only):**
