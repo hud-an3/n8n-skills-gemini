@@ -15,9 +15,10 @@ Trigger this skill whenever a file needs to be saved/uploaded to Google Drive as
 1. Parse the user's prompt for a folder name.
 2. **If a folder name is specified:**
    a. Search Google Drive for a folder matching that name and get it's ID using the Search files and folders in Google Drive tool.
-   c. If the required folder exists, get the required folder's ID so that Upload file in Google Drive can use it as the upload destination. 
+   c. If the required folder exists, get the required folder's ID so that Upload file in Google Drive tool can use it as the upload destination. 
    b. Use the folder ID as the upload destination.
    c. If it does not exist, create a new folder with that exact name, then use the newly created folder's ID as the destination.
+   d. Use the newly created folder's ID using the Search files and folders in Google Drive tool as the upload destination and upload the file in the folder using the Google Drive tool.
 3. **If no folder name is specified in the prompt (file only):**
    a. Use `default_folder` as the upload destination. Do not create a new folder in this case — `default_folder` is assumed to already exist.
 4. Upload `file` to the resolved destination folder.
