@@ -1,7 +1,7 @@
 # Skill: Google Calendar Event Creation
 
 ## Purpose
-Check the user's Google Calendar and create a new event based on details given in the prompt.
+Check the user's Google Calendar and create a new event based on details given in the prompt, the new event should be created based on the timezone UTC+5 (Karachi, Pakistan).
 
 ## When to use this skill
 Trigger this skill when the user's prompt asks to schedule, book, add, or create a meeting/event/reminder on their calendar (e.g. "schedule a call with X tomorrow at 3pm", "add an event for...", "book time for...").
