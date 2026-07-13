@@ -1,0 +1,616 @@
+{
+  "name": "workflow 1.0",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "folderId": {
+            "mode": "list",
+            "value": "root",
+            "cachedResultName": "/ (Root folder)"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        2768,
+        704
+      ],
+      "id": "7e12c02d-6488-4b60-89e5-da0cee4653b1",
+      "name": "Search files and folders in Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FWGZMst2hMFu9mgh",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get text content from a file on github from org, repo name, and path to file",
+        "url": "=https://api.github.com/repos/{{ $fromAI('repoOwnerUsername', ``, 'string') }}/{{ $fromAI('repoName', ``, 'string') }}/contents/{{ $fromAI('File_Path', ``, 'string') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.raw+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "ff726443-6e02-4e41-8c4f-b19a0feabd30",
+      "name": "Get a File From GitHub",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        1760,
+        608
+      ],
+      "typeVersion": 4.4,
+      "credentials": {
+        "githubApi": {
+          "id": "m1pi8LedxexRGREr",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "List the files and directories inside of dirs.\nUse this tool on any DIR to see the files and other directories inside of it",
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $fromAI('repoUsername') }}"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $fromAI('repoName') }}"
+        },
+        "filePath": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Path', \"`/` would be root, `/folder` would list files in the folder named folder\", 'string') }}"
+      },
+      "id": "b067b092-19ad-4276-8967-445b6d7cef0e",
+      "name": "List Files by Path Name",
+      "type": "n8n-nodes-base.githubTool",
+      "position": [
+        1616,
+        608
+      ],
+      "webhookId": "b309da8c-2f65-4c37-bb15-7c8a88c482ba",
+      "typeVersion": 1.1,
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "IdSIPCjIidtfcYRj",
+          "name": "GitHub OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "275c05ea-cde6-4b6a-9916-afe5cda498d9",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              },
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "skills"
+            },
+            {
+              "id": "50420e00-4d14-44ff-8c86-389fac249fa6",
+              "operator": {
+                "type": "string",
+                "operation": "notStartsWith"
+              },
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3522a3eb-658b-4995-b59c-957fab7700a8",
+      "name": "Remove Skills Dirs & Dot Files",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        544,
+        240
+      ],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "id": "9273d45c-4334-4ef7-8ee1-57ba9633ed3b",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1536,
+        464
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8955dd58-72aa-49a9-a6aa-7c1679ee5b51",
+              "name": "SKILLS_REPOS",
+              "type": "array",
+              "value": "=[ \"https://github.com/hud-an3/n8n-skills-gemini_agent-workflow-1.0\"\n]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fd679f2c-4980-44f6-a862-71af6eb3b7e8",
+      "name": "Set GitHub Repo URLs",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        160,
+        240
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $json.SKILLS_REPOS[0].split('/')[3] }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $json.SKILLS_REPOS[0] }}",
+          "mode": "url"
+        },
+        "filePath": "/"
+      },
+      "id": "9891a810-0cf4-4a35-afec-b87d0f89f348",
+      "name": "List Root Dirs",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        352,
+        240
+      ],
+      "webhookId": "4ec37c56-9985-42e6-baf5-fe4ac627182b",
+      "typeVersion": 1.1,
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "IdSIPCjIidtfcYRj",
+          "name": "GitHub OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ $('When chat message received').item.json.chatInput }}\n\n{{ $('When chat message received').item.binary ? 'Attached file(s): ' + Object.keys($('When chat message received').item.binary).map(k => $('When chat message received').item.binary[k].fileName).join(', ') : 'No file attached.' }}\n\n",
+        "options": {
+          "systemMessage": "=You are a helpful assistant. Your capabilities and instructions for completing tasks are stored in skill files in skill directories, whic his listed below in the Available Skills section\n\n## How You Work\nYou do not have built-in knowledge of how to complete tasks. Your instructions live in the skill files. When a user asks you to do something:\n\n1. Identify which skill(s) are relevant to the request, traversing directories using the `List Files by Path Name` tool as needed (ideally concurrently)\n2. Fetch those skill files (use concurrent tool calls when fetching multiple)\n3. Follow the instructions in those files to complete the task\n\n## Available Skills Files and Directories\n{{ \n// 🚨 ONLY UPDATE THIS IF YOU KNOW WHAT YOU'RE DOING 🚨\nJSON.stringify(\n  $('Remove Skills Dirs & Dot Files')\n    .all()\n    .map(item => ({\n      \"type\": item.json.type,\n      \"path\": item.json.path,\n      \"orgName\": item.json.url.split('/')[4],\n      \"repoName\": item.json.url.split('/')[5],\n    }))\n    // this removes any files that we don't want to\n    // use up context displaying\n    .filter(i => \n      i.path.toLowerCase().split('/').last() !== \"readme.md\" && \n      i.path.toLowerCase().split('/').last() !== \"template\" &&\n      i.path.toLowerCase().split('/').last() !== \"license\"\n    ),\n  null,\n  2\n) \n}}\n\n## Important\n- Do NOT answer based on general knowledge — your instructions are in the skill files",
+          "maxIterations": 10,
+          "passthroughBinaryImages": false,
+          "passthroughBinaryPdfs": true
+        }
+      },
+      "id": "29a79ceb-8fa1-40a0-9e4b-cbf0347cd668",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1792,
+        240
+      ],
+      "executeOnce": true,
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true,
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "ac5105f4-ef5f-42fe-b762-22f95ef764b4",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -128,
+        480
+      ],
+      "webhookId": "3611645b-0df7-4c25-8d3b-f4abb9b01fb7",
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        464
+      ],
+      "id": "b5aafe50-ca67-4874-bd5c-994ba285b473",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "j1KcTXaRxWuR9FmI",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ $('Merge').item.binary.data0 }}",
+        "name": "={{ $fromAI('File_Name', ``, 'string') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Parent_Folder', ``, 'string') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        2944,
+        704
+      ],
+      "id": "7e57d922-a5ab-4857-9c86-a836e65d9068",
+      "name": "Upload file in Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FWGZMst2hMFu9mgh",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "noor.aq467@gmail.com",
+          "mode": "list",
+          "cachedResultName": "noor.aq467@gmail.com"
+        },
+        "start": "={{ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        2112,
+        1072
+      ],
+      "id": "0da63f9e-b9ca-4421-b67c-dcb5dea825a8",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "VsX8VnchisGrtLeZ",
+          "name": "Google Calendar OAuth2 API"
+        }
+      },
+      "notes": "create the event according to timezone: UTC+5"
+    },
+    {
+      "parameters": {
+        "q": "={{ $fromAI('Search_Query__q_', ``, 'string') }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        2736,
+        1200
+      ],
+      "id": "493d5fd2-5fb4-41b9-b703-0c7d5b2af7f7",
+      "name": "Google search in SerpApi",
+      "credentials": {
+        "serpApi": {
+          "id": "9EohPM8OSuqEcM1S",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "hl": "en"
+        }
+      },
+      "id": "f243c6b1-5e45-47b1-80d3-5b1268e05711",
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "position": [
+        2896,
+        1200
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "serpApi": {
+          "id": "9EohPM8OSuqEcM1S",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1136,
+        256
+      ],
+      "id": "060482cb-6d41-44f1-8d28-3767ae6563b6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Folder_Name', ``, 'string') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        3104,
+        704
+      ],
+      "id": "49182488-cdcd-4006-81de-dfbe90eefb58",
+      "name": "Create folder in Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FWGZMst2hMFu9mgh",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Remove Skills Dirs & Dot Files": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set GitHub Repo URLs": {
+      "main": [
+        [
+          {
+            "node": "List Root Dirs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Root Dirs": {
+      "main": [
+        [
+          {
+            "node": "Remove Skills Dirs & Dot Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders in Google Drive": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a File From GitHub": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Files by Path Name": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Set GitHub Repo URLs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file in Google Drive": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google search in SerpApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder in Google Drive": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8cf27923-2e52-4b23-9975-7b1953d05857",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b8e7362602c4e9b459ee2202ae6fc396b46e1895a6d416cd35351b26ff8b50d1"
+  },
+  "nodeGroups": [],
+  "id": "bOQsXZJ65mt21QyN",
+  "tags": []
+}
